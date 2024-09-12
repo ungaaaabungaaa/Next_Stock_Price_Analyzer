@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { DateRange, Range, RangeKeyDict } from "react-date-range";
 import "react-date-range/dist/styles.css"; // date range picker styles
@@ -6,7 +6,7 @@ import "react-date-range/dist/theme/default.css"; // default theme styles
 
 const StockForm = () => {
   // State to store selected stock and date range
-  const [selectedStock, setSelectedStock] = useState<string>("");
+  const [selectedStock, setSelectedStock] = useState("");
   const [dateRange, setDateRange] = useState<Range>({
     startDate: new Date(),
     endDate: new Date(),
@@ -14,9 +14,46 @@ const StockForm = () => {
   });
 
   // Function to handle form submission
-  const handleSubmit = () => {
-    console.log("Selected Stock: ", selectedStock);
-    console.log("Selected Date Range: ", dateRange.startDate, " to ", dateRange.endDate);
+  const handleSubmit = async () => {
+    try {
+      // Ensure stock is selected
+      if (!selectedStock) {
+        console.error("No stock selected.");
+        return;
+      }
+
+      // Ensure dateRange is defined and has valid dates
+      if (!dateRange.startDate || !dateRange.endDate) {
+        console.error("Date range is not defined properly.");
+        return;
+      }
+
+      const startDate = dateRange.startDate.toISOString().slice(0, 10);
+      const endDate = dateRange.endDate.toISOString().slice(0, 10);
+
+      console.log("Selected Stock:", selectedStock);
+      console.log("Start Date:", startDate);
+      console.log("End Date:", endDate);
+
+      const response = await fetch("/api/stocks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ticker: selectedStock, startDate, endDate }),
+      });
+
+      // Check if the response is ok
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`HTTP error ${response.status}: ${errorDetails}`);
+      }
+
+      const data = await response.json();
+      console.log("API Response:", data);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   // Function to handle date range change
@@ -28,12 +65,15 @@ const StockForm = () => {
     <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
       {/* Dropdown for stock picker */}
       <div>
-        <label htmlFor="stockPicker" className="block mb-2 text-sm font-medium text-black ">
+        <label
+          htmlFor="stockPicker"
+          className="block mb-2 text-sm font-medium text-black"
+        >
           Select Stock
         </label>
         <select
           id="stockPicker"
-          className="border-gray-300 rounded-md p-2 w-full text-black "
+          className="border-gray-300 rounded-md p-2 w-full text-black"
           value={selectedStock}
           onChange={(e) => setSelectedStock(e.target.value)}
         >
@@ -50,7 +90,9 @@ const StockForm = () => {
 
       {/* Date Range Picker */}
       <div>
-        <label className="block mb-2 text-sm font-medium text-black">Select Date Range</label>
+        <label className="block mb-2 text-sm font-medium text-black">
+          Select Date Range
+        </label>
         <DateRange
           ranges={[dateRange]}
           onChange={handleDateRangeChange}
