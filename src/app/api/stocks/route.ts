@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const filePath = path.resolve('./public/stock_data.csv'); // Adjust the path as necessary
     const fileStream = fs.createReadStream(filePath, 'utf8');
@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function OPTIONS(req: NextRequest) {
+export async function OPTIONS() {
   return NextResponse.json({}, {
     headers: {
       'Access-Control-Allow-Origin': '*',
