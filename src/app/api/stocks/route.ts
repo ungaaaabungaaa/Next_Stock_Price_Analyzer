@@ -2,57 +2,62 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import csvParser from 'csv-parser';
+import { parse } from 'csv-parse/sync';
 
 export async function POST(req: NextRequest) {
   try {
     const { ticker, startDate, endDate } = await req.json();
+    console.log('Received request:', { ticker, startDate, endDate });
 
     // Validate input
     if (!ticker || !startDate || !endDate) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // Read and filter the CSV data
-    const filePath = path.resolve('./public/stock_data.csv'); // Adjust the path as necessary
-    const fileStream = fs.createReadStream(filePath, 'utf8');
+    const filePath = path.resolve('./public/stock_data.csv');
+    console.log('Reading file from:', filePath);
 
-    // Initialize an empty array to store the records
-    const filteredRecords: any[] = [];
+    // Read the entire CSV file
+    const fileContent = fs.readFileSync(filePath, 'utf8');
 
-    // Create a parser stream
-    const parser = csvParser({
-      headers: true
+    // Parse the CSV content
+    const records = parse(fileContent, {
+      columns: true,
+      skip_empty_lines: true
     });
 
-    // Create a promise that resolves when the stream is done
-    const parsePromise = new Promise<void>((resolve, reject) => {
-      fileStream.pipe(parser)
-        .on('data', (data) => {
-          // Debugging: Log the data being processed
-          console.log('Processing record:', data);
-
-          // Filter records based on ticker and date range
-          const recordDate = new Date(data.date);
-          const isInRange = recordDate >= new Date(startDate) && recordDate <= new Date(endDate);
-          if (data.ticker === ticker && isInRange) {
-            filteredRecords.push(data);
-          }
-        })
-        .on('end', () => {
-          // Debugging: Log the filtered records
-          console.log('Filtered records:', filteredRecords);
-          resolve();
-        })
-        .on('error', (error) => reject(error));
+    // Filter the records
+    const filteredRecords = records.filter((record: any) => {
+      const recordDate = new Date(record.Date);
+      return (
+        record.ticker === ticker &&
+        recordDate >= new Date(startDate) &&
+        recordDate <= new Date(endDate)
+      );
     });
 
-    // Wait for the promise to resolve
-    await parsePromise;
+    console.log(`Filtering complete. Found ${filteredRecords.length} matching records.`);
 
-    // Return the filtered records as JSON
-    return NextResponse.json(filteredRecords);
+    if (filteredRecords.length === 0) {
+      console.log('No matching records found');
+      return NextResponse.json({ message: 'No matching records found' }, { status: 404 });
+    }
+
+    // Format the filtered records
+    const formattedRecords = filteredRecords.map((record: any) => ({
+      date: record.Date,
+      open: parseFloat(record.open),
+      high: parseFloat(record.high),
+      low: parseFloat(record.low),
+      close: parseFloat(record.close),
+      volume: parseInt(record.volume),
+      ticker: record.ticker
+    }));
+
+    console.log('Returning filtered records');
+    return NextResponse.json(formattedRecords);
   } catch (error) {
-    console.error('Error in POST request: ', (error as Error).message);
+    console.error('Error in POST request:', (error as Error).message);
     return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
 }
