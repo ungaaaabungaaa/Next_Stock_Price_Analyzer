@@ -3,7 +3,17 @@ import { useState } from "react";
 import { DateRange, Range, RangeKeyDict } from "react-date-range";
 import "react-date-range/dist/styles.css"; // date range picker styles
 import "react-date-range/dist/theme/default.css"; // default theme styles
-import { LineChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from 'recharts';
+import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from 'recharts';
+
+// Define Stock Data Type
+interface StockData {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
 
 const StockForm = () => {
   // State to store selected stock, date range, and fetched data
@@ -13,7 +23,7 @@ const StockForm = () => {
     endDate: new Date(),
     key: "selection",
   });
-  const [stockData, setStockData] = useState<any[]>([]); // to store fetched stock data
+  const [stockData, setStockData] = useState<StockData[]>([]); // Update type here
 
   // Handle Submit
   const handleSubmit = async () => {
@@ -108,7 +118,7 @@ const StockForm = () => {
             </button>
           </div>
 
-          {/* line Chart */}
+          {/* Line Chart */}
           <div className="flex-1 p-6 bg-white rounded-xl min-h-[300px]">
             {stockData.length > 0 && (
                 <>

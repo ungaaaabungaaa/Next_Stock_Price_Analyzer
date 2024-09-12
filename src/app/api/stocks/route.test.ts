@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest} from 'next/server';
 import { POST, GET, OPTIONS } from './route'; // Adjust the import path as necessary
 import fs from 'fs';
 import path from 'path';

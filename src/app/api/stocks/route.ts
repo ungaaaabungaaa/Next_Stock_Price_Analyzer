@@ -4,9 +4,20 @@ import path from 'path';
 import csvParser from 'csv-parser';
 import { parse } from 'csv-parse/sync';
 
+// Define a type for the stock record
+type StockRecord = {
+  Date: string;
+  ticker: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { ticker, startDate, endDate } = await req.json();
+    const { ticker, startDate, endDate }: { ticker: string; startDate: string; endDate: string } = await req.json();
     console.log('Received request:', { ticker, startDate, endDate });
 
     // Validate input
@@ -21,13 +32,13 @@ export async function POST(req: NextRequest) {
     const fileContent = fs.readFileSync(filePath, 'utf8');
 
     // Parse the CSV content
-    const records = parse(fileContent, {
+    const records: StockRecord[] = parse(fileContent, {
       columns: true,
       skip_empty_lines: true
     });
 
     // Filter the records
-    const filteredRecords = records.filter((record: any) => {
+    const filteredRecords = records.filter((record) => {
       const recordDate = new Date(record.Date);
       return (
         record.ticker === ticker &&
@@ -44,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Format the filtered records
-    const formattedRecords = filteredRecords.map((record: any) => ({
+    const formattedRecords = filteredRecords.map((record) => ({
       date: record.Date,
       open: parseFloat(record.open),
       high: parseFloat(record.high),
@@ -68,7 +79,7 @@ export async function GET(req: NextRequest) {
     const fileStream = fs.createReadStream(filePath, 'utf8');
     
     // Initialize an empty array to store the records
-    const records: any[] = [];
+    const records: StockRecord[] = [];
     
     // Create a parser stream
     const parser = csvParser({
@@ -78,7 +89,7 @@ export async function GET(req: NextRequest) {
     // Create a promise that resolves when the stream is done
     const parsePromise = new Promise<void>((resolve, reject) => {
       fileStream.pipe(parser)
-        .on('data', (data) => records.push(data))
+        .on('data', (data) => records.push(data as StockRecord))
         .on('end', () => resolve())
         .on('error', (error) => reject(error));
     });
