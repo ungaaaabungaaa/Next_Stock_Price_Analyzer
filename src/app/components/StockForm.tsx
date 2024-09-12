@@ -58,104 +58,107 @@ const StockForm = () => {
 
   return (
     <>
-      <div className="w-full h-screen flex items-center justify-center flex-row">
-        {/* Form */}
-        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
-          <div>
-            <label
-              htmlFor="stockPicker"
-              className="block mb-2 text-sm font-medium text-black"
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="flex flex-row space-x-4 w-full">
+          {/* Form */}
+          <div className="flex-1 p-6 bg-white rounded-xl shadow-md min-h-[300px]">
+            <div>
+              <label
+                htmlFor="stockPicker"
+                className="block mb-2 text-sm font-medium text-black"
+              >
+                Select Stock
+              </label>
+              <select
+                id="stockPicker"
+                className="border-gray-300 rounded-md p-2 w-full text-black"
+                value={selectedStock}
+                onChange={(e) => setSelectedStock(e.target.value)}
+              >
+                <option value="">Select Stock</option>
+                <option value="AAL">American Airlines (AAL)</option>
+                <option value="AAPL">Apple (AAPL)</option>
+                <option value="AMZN">Amazon (AMZN)</option>
+                <option value="GOOGL">Google (GOOGL)</option>
+                <option value="MSFT">Microsoft (MSFT)</option>
+                <option value="NFLX">Netflix (NFLX)</option>
+                <option value="TSLA">Tesla (TSLA)</option>
+              </select>
+            </div>
+
+            {/* Date Range Picker */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-black">
+                Select Date Range
+              </label>
+              <DateRange
+                ranges={[dateRange]}
+                onChange={handleDateRangeChange}
+                moveRangeOnFirstSelection={false}
+                editableDateInputs={true}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-500 text-white rounded-md px-4 py-2"
             >
-              Select Stock
-            </label>
-            <select
-              id="stockPicker"
-              className="border-gray-300 rounded-md p-2 w-full text-black"
-              value={selectedStock}
-              onChange={(e) => setSelectedStock(e.target.value)}
-            >
-              <option value="">Select Stock</option>
-              <option value="AAL">American Airlines (AAL)</option>
-              <option value="AAPL">Apple (AAPL)</option>
-              <option value="AMZN">Amazon (AMZN)</option>
-              <option value="GOOGL">Google (GOOGL)</option>
-              <option value="MSFT">Microsoft (MSFT)</option>
-              <option value="NFLX">Netflix (NFLX)</option>
-              <option value="TSLA">Tesla (TSLA)</option>
-            </select>
+              Submit
+            </button>
           </div>
 
-          {/* Date Range Picker */}
-          <div>
-            <label className="block mb-2 text-sm font-medium text-black">
-              Select Date Range
-            </label>
-            <DateRange
-              ranges={[dateRange]}
-              onChange={handleDateRangeChange}
-              moveRangeOnFirstSelection={false}
-              editableDateInputs={true}
-            />
+          {/* line Chart */}
+          <div className="flex-1 p-6 bg-white rounded-xl shadow-md min-h-[300px]">
+            {stockData.length > 0 && (
+                <>
+                  <h2 className="text-lg font-semibold text-black mb-2">
+                    {selectedStock} Stock Prices
+                  </h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={stockData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="close" stroke="#8884d8" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </>
+              )}
           </div>
 
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white rounded-md px-4 py-2"
-          >
-            Submit
-          </button>
-        </div>
-
-        {/* line Chart */}
-        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
-          {stockData.length > 0 && (
-              <>
-                <h2 className="text-lg font-semibold text-black mb-2">
-                  {selectedStock} Stock Prices
-                </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={stockData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="close" stroke="#8884d8" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </>
-            )}
-        </div>
-
-        {/* Table to display fetched data */}
-        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
-          {stockData.length > 0 && (
-            <table className="table-auto w-full text-left text-sm text-black">
-              <thead className="space-y-12 ">
-                <tr>
-                  <th>Date</th>
-                  <th>Open</th>
-                  <th>High</th>
-                  <th>Low</th>
-                  <th>Close</th>
-                  <th>Volume</th>
-                </tr>
-              </thead>
-              <tbody className="space-y-12">
-                {stockData.map((stock) => (
-                  <tr key={stock.date}>
-                    <td>{stock.date}</td>
-                    <td>{stock.open}</td>
-                    <td>{stock.high}</td>
-                    <td>{stock.low}</td>
-                    <td>{stock.close}</td>
-                    <td>{stock.volume}</td>
+          {/* Table to display fetched data */}
+          <div className="flex-1 p-6 bg-white rounded-xl shadow-md min-h-[300px]">
+            {stockData.length > 0 && (
+              <table className="table-auto w-full text-left text-sm text-black">
+                <thead className="space-y-12 ">
+                  <tr>
+                    <th>Date</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Volume</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody className="space-y-12">
+                  {stockData.map((stock) => (
+                    <tr key={stock.date}>
+                      <td>{stock.date}</td>
+                      <td>{stock.open}</td>
+                      <td>{stock.high}</td>
+                      <td>{stock.low}</td>
+                      <td>{stock.close}</td>
+                      <td>{stock.volume}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          </div>
       </div>
     </>
   );
