@@ -3,6 +3,9 @@
 ## Objective
 Create a Next.js 14 application that analyzes and visualizes stock price data for multiple tech companies using TypeScript. The focus is on server actions for data processing and basic data visualization.
 
+## NextJs 14 Preview
+![preview]([http://url/to/img.png](https://i.imgur.com/E8HK8sc.png))
+
 ## Context
 You will be provided with a CSV file containing daily stock price data for companies including Apple (AAPL), Microsoft (MSFT), and Amazon (AMZN) from January 1, 2023, to April 6, 2023. The data includes the following fields: Date, Open, High, Low, Close, Volume, and Ticker.
 
