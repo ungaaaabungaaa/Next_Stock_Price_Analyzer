@@ -40,5 +40,5 @@ You will be provided with a CSV file containing daily stock price data for compa
 
 1. **Clone the Repository**
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone https://github.com/ungaaaabungaaa/Next_Stock_Price_Analyzer
+
