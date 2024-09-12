@@ -3,26 +3,26 @@ import { useState } from "react";
 import { DateRange, Range, RangeKeyDict } from "react-date-range";
 import "react-date-range/dist/styles.css"; // date range picker styles
 import "react-date-range/dist/theme/default.css"; // default theme styles
+import { LineChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from 'recharts';
 
 const StockForm = () => {
-  // State to store selected stock and date range
+  // State to store selected stock, date range, and fetched data
   const [selectedStock, setSelectedStock] = useState("");
   const [dateRange, setDateRange] = useState<Range>({
     startDate: new Date(),
     endDate: new Date(),
     key: "selection",
   });
+  const [stockData, setStockData] = useState<any[]>([]); // to store fetched stock data
 
-  // Function to handle form submission
+  // Handle Submit
   const handleSubmit = async () => {
     try {
-      // Ensure stock is selected
       if (!selectedStock) {
         console.error("No stock selected.");
         return;
       }
 
-      // Ensure dateRange is defined and has valid dates
       if (!dateRange.startDate || !dateRange.endDate) {
         console.error("Date range is not defined properly.");
         return;
@@ -30,10 +30,6 @@ const StockForm = () => {
 
       const startDate = dateRange.startDate.toISOString().slice(0, 10);
       const endDate = dateRange.endDate.toISOString().slice(0, 10);
-
-      console.log("Selected Stock:", selectedStock);
-      console.log("Start Date:", startDate);
-      console.log("End Date:", endDate);
 
       const response = await fetch("/api/stocks", {
         method: "POST",
@@ -43,14 +39,13 @@ const StockForm = () => {
         body: JSON.stringify({ ticker: selectedStock, startDate, endDate }),
       });
 
-      // Check if the response is ok
       if (!response.ok) {
         const errorDetails = await response.text();
         throw new Error(`HTTP error ${response.status}: ${errorDetails}`);
       }
 
       const data = await response.json();
-      console.log("API Response:", data);
+      setStockData(data); // Store the fetched data in state
     } catch (error) {
       console.error("Error submitting form:", error);
     }
@@ -62,53 +57,107 @@ const StockForm = () => {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
-      {/* Dropdown for stock picker */}
-      <div>
-        <label
-          htmlFor="stockPicker"
-          className="block mb-2 text-sm font-medium text-black"
-        >
-          Select Stock
-        </label>
-        <select
-          id="stockPicker"
-          className="border-gray-300 rounded-md p-2 w-full text-black"
-          value={selectedStock}
-          onChange={(e) => setSelectedStock(e.target.value)}
-        >
-          <option value="">Select Stock</option>
-          <option value="AAL">American Airlines (AAL)</option>
-          <option value="AAPL">Apple (AAPL)</option>
-          <option value="AMZN">Amazon (AMZN)</option>
-          <option value="GOOGL">Google (GOOGL)</option>
-          <option value="MSFT">Microsoft (MSFT)</option>
-          <option value="NFLX">Netflix (NFLX)</option>
-          <option value="TSLA">Tesla (TSLA)</option>
-        </select>
-      </div>
+    <>
+      <div className="w-full h-screen flex items-center justify-center flex-row">
+        {/* Form */}
+        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
+          <div>
+            <label
+              htmlFor="stockPicker"
+              className="block mb-2 text-sm font-medium text-black"
+            >
+              Select Stock
+            </label>
+            <select
+              id="stockPicker"
+              className="border-gray-300 rounded-md p-2 w-full text-black"
+              value={selectedStock}
+              onChange={(e) => setSelectedStock(e.target.value)}
+            >
+              <option value="">Select Stock</option>
+              <option value="AAL">American Airlines (AAL)</option>
+              <option value="AAPL">Apple (AAPL)</option>
+              <option value="AMZN">Amazon (AMZN)</option>
+              <option value="GOOGL">Google (GOOGL)</option>
+              <option value="MSFT">Microsoft (MSFT)</option>
+              <option value="NFLX">Netflix (NFLX)</option>
+              <option value="TSLA">Tesla (TSLA)</option>
+            </select>
+          </div>
 
-      {/* Date Range Picker */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-black">
-          Select Date Range
-        </label>
-        <DateRange
-          ranges={[dateRange]}
-          onChange={handleDateRangeChange}
-          moveRangeOnFirstSelection={false}
-          editableDateInputs={true}
-        />
-      </div>
+          {/* Date Range Picker */}
+          <div>
+            <label className="block mb-2 text-sm font-medium text-black">
+              Select Date Range
+            </label>
+            <DateRange
+              ranges={[dateRange]}
+              onChange={handleDateRangeChange}
+              moveRangeOnFirstSelection={false}
+              editableDateInputs={true}
+            />
+          </div>
 
-      {/* Submit Button */}
-      <button
-        onClick={handleSubmit}
-        className="bg-blue-500 text-white rounded-md px-4 py-2"
-      >
-        Submit
-      </button>
-    </div>
+          {/* Submit Button */}
+          <button
+            onClick={handleSubmit}
+            className="bg-blue-500 text-white rounded-md px-4 py-2"
+          >
+            Submit
+          </button>
+        </div>
+
+        {/* line Chart */}
+        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
+          {stockData.length > 0 && (
+              <>
+                <h2 className="text-lg font-semibold text-black mb-2">
+                  {selectedStock} Stock Prices
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={stockData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="close" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </>
+            )}
+        </div>
+
+        {/* Table to display fetched data */}
+        <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
+          {stockData.length > 0 && (
+            <table className="table-auto w-full text-left text-sm text-black">
+              <thead className="space-y-12 ">
+                <tr>
+                  <th>Date</th>
+                  <th>Open</th>
+                  <th>High</th>
+                  <th>Low</th>
+                  <th>Close</th>
+                  <th>Volume</th>
+                </tr>
+              </thead>
+              <tbody className="space-y-12">
+                {stockData.map((stock) => (
+                  <tr key={stock.date}>
+                    <td>{stock.date}</td>
+                    <td>{stock.open}</td>
+                    <td>{stock.high}</td>
+                    <td>{stock.low}</td>
+                    <td>{stock.close}</td>
+                    <td>{stock.volume}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 
