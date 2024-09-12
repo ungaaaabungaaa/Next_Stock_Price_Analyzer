@@ -24,11 +24,9 @@ describe('Route Handler Tests', () => {
         })
       } as unknown as NextRequest;
 
-      const mockFileContent = `Date,open,high,low,close,volume,ticker
+      (fs.readFileSync as jest.Mock).mockReturnValue(`Date,open,high,low,close,volume,ticker
 2023-01-15,150,155,149,153,1000000,AAPL
-2023-01-16,153,158,152,157,1200000,AAPL`;
-
-      (fs.readFileSync as jest.Mock).mockReturnValue(mockFileContent);
+2023-01-16,153,158,152,157,1200000,AAPL`);
       (path.resolve as jest.Mock).mockReturnValue('/mock/path/stock_data.csv');
 
       const mockParse = jest.requireMock('csv-parse/sync').parse;
@@ -94,10 +92,6 @@ describe('Route Handler Tests', () => {
   describe('GET method', () => {
     it('should return all records', async () => {
       const mockRequest = {} as NextRequest;
-
-      const mockFileContent = `Date,open,high,low,close,volume,ticker
-2023-01-15,150,155,149,153,1000000,AAPL
-2023-01-16,153,158,152,157,1200000,AAPL`;
 
       (fs.createReadStream as jest.Mock).mockReturnValue({
         pipe: jest.fn().mockReturnThis(),
