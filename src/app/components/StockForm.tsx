@@ -61,7 +61,7 @@ const StockForm = () => {
       <div className="w-full h-screen flex items-center justify-center">
         <div className="flex flex-row space-x-4 w-full">
           {/* Form */}
-          <div className="flex-1 p-6 bg-white rounded-xl shadow-md min-h-[300px]">
+          <div className="flex-1 p-6 bg-white rounded-xl min-h-[300px]">
             <div>
               <label
                 htmlFor="stockPicker"
@@ -109,7 +109,7 @@ const StockForm = () => {
           </div>
 
           {/* line Chart */}
-          <div className="flex-1 p-6 bg-white rounded-xl shadow-md min-h-[300px]">
+          <div className="flex-1 p-6 bg-white rounded-xl min-h-[300px]">
             {stockData.length > 0 && (
                 <>
                   <h2 className="text-lg font-semibold text-black mb-2">
@@ -129,7 +129,7 @@ const StockForm = () => {
           </div>
 
           {/* Table to display fetched data */}
-          <div className="flex-1 p-6 bg-white rounded-xl shadow-md min-h-[300px]">
+          <div className="flex-1 p-6 bg-white rounded-xl  min-h-[300px]">
             {stockData.length > 0 && (
               <table className="table-auto w-full text-left text-sm text-black">
                 <thead className="space-y-12 ">
